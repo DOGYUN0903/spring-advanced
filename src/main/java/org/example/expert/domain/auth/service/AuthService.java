@@ -26,13 +26,15 @@ public class AuthService {
     @Transactional
     public SignupResponse signup(SignupRequest signupRequest) {
 
-        String encodedPassword = passwordEncoder.encode(signupRequest.getPassword());
-
-        UserRole userRole = UserRole.of(signupRequest.getUserRole());
-
+        // 이메일 중복검사 먼저 실시한다.
         if (userRepository.existsByEmail(signupRequest.getEmail())) {
             throw new InvalidRequestException("이미 존재하는 이메일입니다.");
         }
+
+        // 이메일 중복 검사에서 예외가 터지면 비밀번호 암호화는 안해도된다.
+        String encodedPassword = passwordEncoder.encode(signupRequest.getPassword());
+
+        UserRole userRole = UserRole.of(signupRequest.getUserRole());
 
         User newUser = new User(
                 signupRequest.getEmail(),
